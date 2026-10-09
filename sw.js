@@ -1,5 +1,5 @@
 // Офлайн-кэш: всё, что игра однажды загрузила (картинки, озвучку), дальше берётся из кэша.
-const CACHE = 'govorushka-v4';
+const CACHE = 'govorushka-v5';
 const CORE = ['./', 'index.html', 'style.css', 'art.js', 'sound.js', 'game.js', 'content.json', 'phrases.json', 'manifest.webmanifest', 'icon-192.png'];
 
 self.addEventListener('install', e => {

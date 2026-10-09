@@ -4,7 +4,7 @@
 
 const SOUND = (() => {
   let ctx = null, master, musicBus, sfxBus, voiceBus, analyser, noiseBuf;
-  const MUSIC_VOL = .32, DUCK_VOL = .09;
+  const MUSIC_VOL = .16, DUCK_VOL = .045;
   let musicOn = true;
   try { musicOn = localStorage.getItem('gov_music') !== '0'; } catch {}
 
