@@ -17,9 +17,10 @@ const SOUND = (() => {
     master.connect(comp).connect(ctx.destination);
     musicBus = ctx.createGain(); musicBus.gain.value = musicOn ? MUSIC_VOL : 0; musicBus.connect(master);
     sfxBus = ctx.createGain(); sfxBus.gain.value = .55; sfxBus.connect(master);
-    voiceBus = ctx.createGain(); voiceBus.gain.value = 1.15;
+    // голос идёт напрямую, без компрессора — чтобы не менялся тембр
+    voiceBus = ctx.createGain(); voiceBus.gain.value = 1;
     analyser = ctx.createAnalyser(); analyser.fftSize = 512;
-    voiceBus.connect(analyser); voiceBus.connect(master);
+    voiceBus.connect(analyser); voiceBus.connect(ctx.destination);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
