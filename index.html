@@ -10,6 +10,9 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Говорушка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@900&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-screen="start">
@@ -23,6 +26,7 @@
 
 <section id="start" class="screen">
   <div class="wrap">
+    <div class="logo"></div>
     <div class="hero"></div>
     <button id="startBtn" aria-label="Играть"></button>
   </div>
@@ -37,8 +41,10 @@
 <div id="finish"></div>
 <div id="hand"></div>
 <div id="iris"></div>
+<div id="grain"></div>
 
 <script src="art.js"></script>
+<script src="fx.js"></script>
 <script src="sound.js"></script>
 <script src="game.js"></script>
 </body>

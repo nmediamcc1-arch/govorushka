@@ -8,11 +8,13 @@ const ART = (() => {
   const mirror = s => `<g transform="matrix(-1 0 0 1 200 0)">${s}</g>`;
   const both = s => s + mirror(s);
 
+  // глаз: обычный (.eo) и «счастливый» дугой (.eh) — переключается классом .happy
   function eye(x, y, s = 1) {
-    return `<g class="eye">
+    return `<g class="eye"><g class="eo">
       <ellipse cx="${x}" cy="${y}" rx="${9 * s}" ry="${11 * s}" fill="${INK}"/>
       <circle cx="${x + 3 * s}" cy="${y - 4 * s}" r="${3.8 * s}" fill="#fff"/>
-      <circle cx="${x - 3 * s}" cy="${y + 4.5 * s}" r="${1.7 * s}" fill="#fff" opacity=".8"/></g>`;
+      <circle cx="${x - 3 * s}" cy="${y + 4.5 * s}" r="${1.7 * s}" fill="#fff" opacity=".8"/></g>
+      <path class="eh" d="M${x - 9 * s} ${y + 3 * s} Q${x} ${y - 10 * s} ${x + 9 * s} ${y + 3 * s}" stroke="${INK}" stroke-width="${5 * s}" fill="none" stroke-linecap="round"/></g>`;
   }
   const eyes = (x1, x2, y, s) => `<g class="look">${eye(x1, y, s)}${eye(x2, y, s)}</g>`;
   function mouth(x, y, w = 12) {
@@ -32,7 +34,7 @@ const ART = (() => {
       <ellipse cx="72" cy="58" rx="34" ry="18" fill="#fff" opacity=".22" transform="rotate(-20 72 58)"/></g>`;
   }
   const whiskers = (y, c = '#6b4a3a') => both(`<path d="M68 ${y} L38 ${y - 6} M68 ${y + 7} L36 ${y + 9}" stroke="${c}" stroke-width="3" stroke-linecap="round" opacity=".45"/>`);
-  const svg = (inner, cls = '') => `<svg class="char ${cls}" viewBox="0 0 200 200" overflow="visible">${inner}</svg>`;
+  const svg = inner => inner; // головы — внутренняя разметка; обёртку дают char() / head()
 
   const A = {};
   A.cow = () => svg(
@@ -109,7 +111,7 @@ const ART = (() => {
     `<circle cx="100" cy="134" r="9" fill="#ff7a9a"/>` + whiskers(136) +
     eyes(80, 120, 110) + cheeks(64, 136, 132) + mouth(100, 150, 9));
   A.bee = () => svg(
-    both(`<ellipse cx="46" cy="60" rx="30" ry="18" fill="#e6f6ff" stroke="#bfe3f7" stroke-width="3" transform="rotate(-32 46 60)"/>`) +
+    `<g class="wingf">${both(`<ellipse cx="46" cy="60" rx="30" ry="18" fill="#e6f6ff" stroke="#bfe3f7" stroke-width="3" transform="rotate(-32 46 60)"/>`)}</g>` +
     both(`<path d="M84 52 Q76 30 66 22" stroke="#3a3340" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="64" cy="20" r="8" fill="#3a3340"/>`) +
     head('<circle cx="100" cy="112" r="64"/>', '#ffd23a') +
     `<path d="M40 82 Q100 56 160 82 L164 96 Q100 70 36 96Z" fill="#3a3340"/>` +
@@ -228,72 +230,204 @@ const ART = (() => {
       fill="#fff" stroke="#3a3340" stroke-width="5" stroke-linejoin="round"/></svg>`,
   };
 
-  /* ---------- фон-сцены ---------- */
-  function cloud(x, y, s, cls) {
-    return `<g class="${cls}" transform="translate(${x} ${y}) scale(${s})">
-      <path d="M20 70 C0 70 0 40 26 40 C30 14 70 6 84 30 C96 10 140 14 140 44 C166 42 170 70 148 70Z" fill="#fff"/>
-      <path d="M20 70 C10 70 6 62 8 56 C30 64 120 66 160 58 C162 66 156 70 148 70Z" fill="#e3f1fb"/></g>`;
+  /* ---------- тела: персонажи в полный рост ----------
+     Голова (риг выше) сажается на тело. Части с классами для анимации:
+     .body-root (дыхание), .head-g (наклон), .tail (виляет), .arm (руки/крылья), .leg (ноги). */
+  function shade(shape, color) {
+    const id = 'b' + uid++;
+    return `<defs><clipPath id="${id}">${shape}</clipPath></defs><g fill="${color}">${shape}</g>
+      <g clip-path="url(#${id})"><ellipse cx="100" cy="256" rx="96" ry="44" fill="#000" opacity=".1"/>
+      <ellipse cx="76" cy="168" rx="20" ry="11" fill="#fff" opacity=".22" transform="rotate(-25 76 168)"/></g>`;
   }
-  function flower(x, y, c) {
-    return `<g transform="translate(${x} ${y})"><path d="M0 0 V30" stroke="#3a9a3e" stroke-width="5"/>
-      ${[0, 72, 144, 216, 288].map(a => `<circle cx="${Math.cos(a * Math.PI / 180) * 11}" cy="${Math.sin(a * Math.PI / 180) * 11}" r="9" fill="${c}"/>`).join('')}
-      <circle r="7" fill="#ffd23a"/></g>`;
+  function leg(x, y1, y2, w, c, hoof, cls = '') {
+    const id = 'l' + uid++, r = `<rect x="${x - w / 2}" y="${y1}" width="${w}" height="${y2 - y1}" rx="${w / 2}"/>`;
+    return `<g class="leg ${cls}"><defs><clipPath id="${id}">${r}</clipPath></defs><g fill="${c}">${r}</g>
+      ${hoof ? `<g clip-path="url(#${id})"><rect x="${x - w}" y="${y2 - 10}" width="${w * 2}" height="12" fill="${hoof}"/></g>` : ''}</g>`;
   }
-  function tree(x, y, s) {
-    return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-12" y="40" width="24" height="70" rx="8" fill="#9a6a43"/>
-      <circle cx="0" cy="10" r="56" fill="#4fb84a"/><circle cx="-40" cy="40" r="40" fill="#4fb84a"/><circle cx="40" cy="40" r="40" fill="#4fb84a"/>
-      <circle cx="-14" cy="-6" r="22" fill="#6fd062" opacity=".8"/><circle cx="24" cy="60" r="7" fill="#ff5a5a"/><circle cx="-30" cy="30" r="7" fill="#ff5a5a"/><circle cx="20" cy="14" r="7" fill="#ff5a5a"/></g>`;
+  const BODY = {
+    cow:      { t: 'quad', body: '#fffaf2', belly: '#f3e8da', leg: '#fffaf2', hoof: '#6b5a52' },
+    cat:      { t: 'quad', body: '#ffad57', belly: '#fff1e0', leg: '#ffad57', hoof: '#fff1e0' },
+    dog:      { t: 'quad', body: '#e2ab6f', belly: '#fbe4c6', leg: '#e2ab6f', hoof: '#fbe4c6' },
+    pig:      { t: 'quad', body: '#ffb6c8', belly: '#ffd2de', leg: '#ffb6c8', hoof: '#ff8fab' },
+    horse:    { t: 'quad', body: '#b8763e', belly: '#e8b98a', leg: '#b8763e', hoof: '#5a3518' },
+    sheep:    { t: 'sheep', body: '#fffdf8', leg: '#5a4a44' },
+    mouse:    { t: 'biped', body: '#c9c6d8', belly: '#efedf6', foot: '#ffc2d1' },
+    rabbit:   { t: 'biped', body: '#f6f2f2', belly: '#ffffff', foot: '#ece6e6' },
+    bear:     { t: 'biped', body: '#9a6a43', belly: '#e3b98d', foot: '#8e6040' },
+    monkey:   { t: 'biped', body: '#8b5a3c', belly: '#f0c9a0', foot: '#f0c9a0' },
+    squirrel: { t: 'biped', body: '#e08b3f', belly: '#fff1e0', foot: '#c76e27' },
+    duck:     { t: 'bird', body: '#ffd84d', belly: '#ffe680', wing: '#ffc933', foot: '#ff9a2e' },
+    rooster:  { t: 'bird', body: '#fff4e2', belly: '#ffffff', wing: '#efd8b8', foot: '#ffb02e' },
+    owl:      { t: 'bird', body: '#a8774b', belly: '#f4e1c1', wing: '#8a5a36', foot: '#ffa62b' },
+    parrot:   { t: 'bird', body: '#ff5a4e', belly: '#ff8a5a', wing: '#2fb6ff', foot: '#8c8c9a' },
+    frog:     { t: 'frog', body: '#7fd35a', belly: '#d4f5b0' },
+    bee:      { t: 'bee', body: '#ffd23a' },
+  };
+  const TAIL = {
+    cow: () => `<g class="tail"><path d="M140 194 C158 190 166 176 164 160" stroke="#fffaf2" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M164 164 q-9 -12 1 -19 q9 6 5 19z" fill="#3a3340"/></g>`,
+    cat: () => `<g class="tail"><path d="M136 214 C174 212 178 170 160 148" stroke="#ffad57" stroke-width="13" fill="none" stroke-linecap="round"/><circle cx="160" cy="149" r="6.5" fill="#e8842a"/></g>`,
+    dog: () => `<g class="tail"><path d="M136 200 C156 196 166 180 168 160" stroke="#c98f55" stroke-width="12" fill="none" stroke-linecap="round"/></g>`,
+    pig: () => `<g class="tail"><path d="M142 196 c10 -2 14 -12 6 -16 c-8 -4 -12 6 -4 10 c8 4 16 -2 16 -10" stroke="#ff8fab" stroke-width="5" fill="none" stroke-linecap="round"/></g>`,
+    horse: () => `<g class="tail"><path d="M140 188 C172 184 178 214 166 242 C158 222 150 210 140 204Z" fill="#5a3518"/></g>`,
+    sheep: () => `<circle cx="148" cy="200" r="13" fill="#fffdf8"/>`,
+    mouse: () => `<g class="tail"><path d="M134 224 C172 230 180 196 162 184" stroke="#ffb3c6" stroke-width="5" fill="none" stroke-linecap="round"/></g>`,
+    rabbit: () => `<circle cx="140" cy="224" r="13" fill="#fff"/>`,
+    monkey: () => `<g class="tail"><path d="M134 222 C174 232 188 190 168 176 C156 168 146 182 160 188" stroke="#8b5a3c" stroke-width="9" fill="none" stroke-linecap="round"/></g>`,
+    duck: () => `<g class="tail"><path d="M138 208 q20 -6 22 -24 q-14 6 -26 10z" fill="#ffc933"/></g>`,
+    rooster: () => `<g class="tail"><path d="M136 200 C148 158 180 148 188 170 C172 168 156 184 146 208Z" fill="#ff5a3a"/>
+      <path d="M138 206 C160 174 192 176 192 198 C178 192 160 200 146 214Z" fill="#2faa5a"/>
+      <path d="M138 212 C162 196 188 206 184 224 C170 214 156 216 144 220Z" fill="#ff9a2e"/></g>`,
+    parrot: () => `<path d="M90 222 L82 256 Q100 262 118 256 L110 222Z" fill="#2fb6ff"/><path d="M96 224 L94 256 Q100 258 106 256 L104 224Z" fill="#ffd23a"/>`,
+  };
+  const TORSO = {
+    quad: (c, id) => `<g class="back" style="filter:brightness(.9)">${leg(66, 190, 238, 17, c.leg, c.hoof, 'l')}${leg(134, 190, 238, 17, c.leg, c.hoof, 'r')}</g>
+      ${shade('<ellipse cx="100" cy="188" rx="48" ry="40"/>', c.body)}
+      <ellipse cx="100" cy="202" rx="28" ry="21" fill="${c.belly}"/>
+      ${id === 'cow' ? '<path d="M64 178 c8 -12 26 -8 26 6 c0 12 -18 14 -26 -6z" fill="#3a3340"/><path d="M122 200 c6 -9 22 -7 22 4 c-2 11 -18 11 -22 -4z" fill="#3a3340"/>' : ''}
+      ${leg(82, 204, 244, 19, c.leg, c.hoof, 'l')}${leg(118, 204, 244, 19, c.leg, c.hoof, 'r')}`,
+    biped: c => `${shade('<ellipse cx="100" cy="196" rx="42" ry="40"/>', c.body)}
+      <ellipse cx="100" cy="204" rx="27" ry="26" fill="${c.belly}"/>
+      <g class="leg l"><ellipse cx="80" cy="236" rx="18" ry="11" fill="${c.foot}"/></g><g class="leg r"><ellipse cx="120" cy="236" rx="18" ry="11" fill="${c.foot}"/></g>
+      <g class="arm l"><ellipse cx="62" cy="194" rx="12" ry="24" fill="${c.body}" transform="rotate(18 62 194)"/></g>
+      <g class="arm r"><ellipse cx="138" cy="194" rx="12" ry="24" fill="${c.body}" transform="rotate(-18 138 194)"/></g>`,
+    bird: (c, id) => `${shade('<path d="M100 142 C134 142 146 176 146 204 C146 228 126 240 100 240 C74 240 54 228 54 204 C54 176 66 142 100 142Z"/>', c.body)}
+      <ellipse cx="100" cy="208" rx="29" ry="26" fill="${c.belly}"/>
+      ${id === 'owl' ? '<path d="M86 200 q6 6 12 0 M102 200 q6 6 12 0 M94 214 q6 6 12 0" stroke="#c9a77c" stroke-width="3.5" fill="none" stroke-linecap="round"/>' : ''}
+      <g class="arm l"><path d="M60 164 C38 176 34 214 52 230 C62 214 68 194 68 170Z" fill="${c.wing}"/></g>
+      <g class="arm r"><path d="M140 164 C162 176 166 214 148 230 C138 214 132 194 132 170Z" fill="${c.wing}"/></g>
+      <g class="leg l"><path d="M86 236 v6 l-8 5 M86 242 v7 M86 242 l8 5" stroke="${c.foot}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+      <g class="leg r"><path d="M114 236 v6 l-8 5 M114 242 v7 M114 242 l8 5" stroke="${c.foot}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>`,
+    sheep: c => {
+      const puffs = [[66, 184], [80, 164], [100, 158], [120, 164], [134, 184], [132, 208], [100, 218], [68, 208], [100, 190]];
+      return `${leg(72, 196, 238, 12, c.leg, null, 'l')}${leg(128, 196, 238, 12, c.leg, null, 'r')}
+        ${puffs.map(([x, y]) => `<circle cx="${x}" cy="${y + 4}" r="23" fill="#e9e1d3"/>`).join('')}${puffs.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="23" fill="${c.body}"/>`).join('')}
+        ${leg(88, 212, 244, 12, c.leg, null, 'l')}${leg(112, 212, 244, 12, c.leg, null, 'r')}`;
+    },
+    frog: c => `<g class="leg l"><ellipse cx="56" cy="222" rx="26" ry="17" fill="${c.body}"/><ellipse cx="42" cy="238" rx="17" ry="7" fill="#5fb840"/></g>
+      <g class="leg r"><ellipse cx="144" cy="222" rx="26" ry="17" fill="${c.body}"/><ellipse cx="158" cy="238" rx="17" ry="7" fill="#5fb840"/></g>
+      ${shade('<ellipse cx="100" cy="204" rx="50" ry="38"/>', c.body)}
+      <ellipse cx="100" cy="214" rx="31" ry="23" fill="${c.belly}"/>
+      <ellipse cx="80" cy="238" rx="13" ry="7" fill="#5fb840"/><ellipse cx="120" cy="238" rx="13" ry="7" fill="#5fb840"/>`,
+    bee: c => {
+      const id = 'e' + uid++, sh = '<ellipse cx="100" cy="196" rx="36" ry="34"/>';
+      return `<path d="M84 224 l-6 12 M116 224 l6 12" stroke="#3a3340" stroke-width="4" stroke-linecap="round"/>
+        <path d="M93 226 L100 246 L107 226Z" fill="#3a3340"/>
+        <defs><clipPath id="${id}">${sh}</clipPath></defs><g fill="${c.body}">${sh}</g>
+        <g clip-path="url(#${id})"><rect x="50" y="186" width="100" height="12" fill="#3a3340"/><rect x="50" y="210" width="100" height="12" fill="#3a3340"/>
+        <ellipse cx="100" cy="240" rx="50" ry="18" fill="#000" opacity=".1"/></g>`;
+    },
+  };
+  const HEAD_DY = { quad: 17, biped: 23, bird: 13, sheep: 7, frog: 29, bee: 21 };
+  function char(id) {
+    const c = BODY[id];
+    if (!c) return headSvg(id);
+    return `<svg class="char full${id === 'parrot' ? ' parrot' : ''}${c.t === 'bee' ? ' flyer' : ''}" viewBox="0 0 200 250" overflow="visible">
+      <ellipse class="shadow" cx="100" cy="245" rx="54" ry="8" fill="#1e3c1e" opacity=".16"/>
+      <g class="body-root">${TAIL[id] ? TAIL[id](c) : ''}${TORSO[c.t](c, id)}
+      <g transform="translate(17 ${HEAD_DY[c.t]}) scale(.83)"><g class="head-g">${A[id]()}</g></g></g></svg>`;
   }
-  function barn(x, y, s) {
-    return `<g transform="translate(${x} ${y}) scale(${s})">
-      <path d="M-120 40 L0 -60 L120 40 L120 200 L-120 200Z" fill="#e8483d"/>
-      <path d="M-136 50 L0 -76 L136 50 L120 50 L0 -56 L-120 50Z" fill="#7a4a3a"/>
-      <rect x="-50" y="80" width="100" height="120" fill="#fff4e2"/><rect x="-42" y="88" width="84" height="112" fill="#b8352c"/>
-      <path d="M-42 88 L42 200 M42 88 L-42 200" stroke="#fff4e2" stroke-width="8"/>
-      <circle cx="0" cy="10" r="22" fill="#fff4e2"/><circle cx="0" cy="10" r="15" fill="#7a4a3a"/></g>`;
+  const headSvg = id => `<svg class="char head${id === 'parrot' ? ' parrot' : ''}" viewBox="0 0 200 200" overflow="visible">${A[id]()}</svg>`;
+
+  /* ---------- реквизит сцен ---------- */
+  const P = {};
+  P.sun = `<svg viewBox="-130 -130 260 260" overflow="visible"><g class="rays">${Array.from({ length: 12 }, (_, i) => `<path d="M0 -122 L15 -90 L-15 -90Z" fill="#ffc93c" transform="rotate(${i * 30})"/>`).join('')}</g>
+    <circle r="84" fill="#ffd23a"/><circle r="70" fill="#ffe066"/><ellipse cx="-26" cy="-34" rx="22" ry="12" fill="#fff" opacity=".35" transform="rotate(-30 -26 -34)"/>
+    <g class="look">${''}<g class="eye"><g class="eo"><ellipse cx="-24" cy="-8" rx="8" ry="10" fill="${INK}"/><circle cx="-21" cy="-12" r="3" fill="#fff"/></g><path class="eh" d="M-32 -6 Q-24 -16 -16 -6" stroke="${INK}" stroke-width="4.5" fill="none" stroke-linecap="round"/></g>
+    <g class="eye"><g class="eo"><ellipse cx="24" cy="-8" rx="8" ry="10" fill="${INK}"/><circle cx="27" cy="-12" r="3" fill="#fff"/></g><path class="eh" d="M16 -6 Q24 -16 32 -6" stroke="${INK}" stroke-width="4.5" fill="none" stroke-linecap="round"/></g></g>
+    <path d="M-20 18 Q0 36 20 18" stroke="#c9741a" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="-46" cy="14" rx="13" ry="8" fill="#ff8a5a" opacity=".45"/><ellipse cx="46" cy="14" rx="13" ry="8" fill="#ff8a5a" opacity=".45"/></svg>`;
+  P.cloud = `<svg viewBox="0 0 170 80" overflow="visible"><path d="M20 72 C0 72 0 42 26 42 C30 14 70 6 84 30 C96 10 140 14 140 46 C166 44 170 72 148 72Z" fill="#fff"/>
+    <path d="M20 72 C10 72 4 64 8 56 C30 66 120 68 162 58 C164 68 156 72 148 72Z" fill="#dcecf8"/></svg>`;
+  P.tree = (c = '#4fb84a', fruit = '#ff5a5a') => `<svg viewBox="-100 -90 200 220" overflow="visible"><path d="M-14 20 Q-10 90 -22 126 L22 126 Q10 90 14 20Z" fill="#9a6a43"/><path d="M4 30 Q8 90 0 124 L22 126 Q10 90 14 20Z" fill="#7a4f30" opacity=".5"/>
+    <g class="crown"><circle cx="0" cy="-10" r="62" fill="${c}"/><circle cx="-48" cy="24" r="44" fill="${c}"/><circle cx="48" cy="24" r="44" fill="${c}"/>
+    <circle cx="0" cy="40" r="40" fill="#000" opacity=".08"/><circle cx="-18" cy="-30" r="26" fill="#fff" opacity=".14"/>
+    ${fruit ? `<circle cx="26" cy="44" r="8" fill="${fruit}"/><circle cx="-34" cy="22" r="8" fill="${fruit}"/><circle cx="22" cy="0" r="8" fill="${fruit}"/><circle cx="-8" cy="36" r="8" fill="${fruit}"/>` : ''}</g></svg>`;
+  P.pine = `<svg viewBox="-50 -110 100 160" overflow="visible"><rect x="-7" y="20" width="14" height="28" rx="4" fill="#7a4f30"/>
+    <path d="M0 -106 L40 -40 L22 -40 L48 6 L28 6 L54 30 L-54 30 L-28 6 L-48 6 L-22 -40 L-40 -40Z" fill="#3f9a52"/><path d="M0 -106 L40 -40 L22 -40 L48 6 L28 6 L54 30 L0 30Z" fill="#000" opacity=".1"/></svg>`;
+  P.flower = c => `<svg viewBox="-30 -30 60 90" overflow="visible"><path d="M0 4 Q4 30 0 58" stroke="#3a9a3e" stroke-width="5" fill="none"/><path d="M0 40 q-18 -6 -20 -18 q14 0 20 12z" fill="#4fb84a"/>
+    <g class="petals">${[0, 72, 144, 216, 288].map(a => `<ellipse cx="0" cy="-13" rx="9" ry="13" fill="${c}" transform="rotate(${a})"/>`).join('')}<circle r="8" fill="#ffd23a"/><circle cx="-2" cy="-2" r="3" fill="#fff" opacity=".6"/></g></svg>`;
+  P.bush = `<svg viewBox="0 0 240 140" overflow="visible"><circle cx="60" cy="90" r="56" fill="#5cbf4c"/><circle cx="130" cy="70" r="66" fill="#5cbf4c"/><circle cx="196" cy="96" r="48" fill="#5cbf4c"/>
+    <circle cx="110" cy="120" r="60" fill="#4fae40"/><circle cx="118" cy="44" r="26" fill="#fff" opacity=".12"/>
+    <circle cx="80" cy="70" r="6" fill="#ff8ab3"/><circle cx="150" cy="56" r="6" fill="#fff"/><circle cx="190" cy="84" r="6" fill="#ff8ab3"/><circle cx="120" cy="96" r="6" fill="#fff"/></svg>`;
+  P.butterfly = c => `<svg viewBox="-30 -24 60 48" overflow="visible"><g class="wing l"><ellipse cx="-12" cy="-8" rx="13" ry="11" fill="${c}"/><ellipse cx="-10" cy="10" rx="9" ry="8" fill="${c}" opacity=".85"/><circle cx="-14" cy="-9" r="4" fill="#fff" opacity=".6"/></g>
+    <g class="wing r"><ellipse cx="12" cy="-8" rx="13" ry="11" fill="${c}"/><ellipse cx="10" cy="10" rx="9" ry="8" fill="${c}" opacity=".85"/><circle cx="14" cy="-9" r="4" fill="#fff" opacity=".6"/></g>
+    <ellipse rx="3.5" ry="14" fill="#3a3340"/><path d="M-2 -13 q-6 -10 -10 -10 M2 -13 q6 -10 10 -10" stroke="#3a3340" stroke-width="2" fill="none"/></svg>`;
+  P.barn = `<svg viewBox="-150 -90 300 300" overflow="visible">
+    <path d="M-120 40 L0 -60 L120 40 L120 200 L-120 200Z" fill="#e8483d"/><path d="M40 -26 L120 40 L120 200 L40 200Z" fill="#000" opacity=".08"/>
+    ${Array.from({ length: 8 }, (_, i) => `<path d="M-120 ${50 + i * 20} H120" stroke="#c93a30" stroke-width="3" opacity=".5"/>`).join('')}
+    <path d="M-138 52 L0 -78 L138 52 L118 52 L0 -56 L-118 52Z" fill="#7a4a3a"/>
+    <rect x="-52" y="80" width="104" height="120" rx="4" fill="#fff4e2"/><rect x="-44" y="88" width="88" height="112" fill="#b8352c"/>
+    <path d="M-44 88 L44 200 M44 88 L-44 200" stroke="#fff4e2" stroke-width="8"/><path d="M0 88 V200" stroke="#fff4e2" stroke-width="6"/>
+    <circle cx="0" cy="10" r="24" fill="#fff4e2"/><circle cx="0" cy="10" r="16" fill="#5a3418"/><path d="M-16 10 H16 M0 -6 V26" stroke="#fff4e2" stroke-width="4"/></svg>`;
+  P.windmill = `<svg viewBox="-80 -90 160 220" overflow="visible"><path d="M-22 120 L-12 -10 L12 -10 L22 120Z" fill="#fff4e2"/><path d="M0 -10 L12 -10 L22 120 L4 120Z" fill="#000" opacity=".07"/>
+    <path d="M-18 -10 L0 -34 L18 -10Z" fill="#e8483d"/><rect x="-8" y="86" width="16" height="34" rx="8" fill="#b8763e"/>
+    <g class="blades" transform="translate(0 -14)">${[0, 90, 180, 270].map(a => `<g transform="rotate(${a})"><rect x="-5" y="-78" width="10" height="72" rx="4" fill="#b8763e"/><rect x="5" y="-74" width="18" height="56" rx="3" fill="#fff" stroke="#d8c7ae" stroke-width="2"/></g>`).join('')}<circle r="8" fill="#7a4a3a"/></g></svg>`;
+  P.hay = `<svg viewBox="0 0 120 80" overflow="visible"><rect x="4" y="10" width="112" height="66" rx="14" fill="#f2c94c"/><rect x="4" y="10" width="112" height="22" rx="10" fill="#ffe08a"/>
+    <path d="M30 14 V74 M90 14 V74" stroke="#c99a2e" stroke-width="5"/><path d="M14 40 l8 -6 M50 52 l8 -6 M70 30 l8 -6 M100 56 l8 -6" stroke="#d9ac3a" stroke-width="3"/></svg>`;
+  P.basket = `<svg viewBox="0 0 160 130" overflow="visible"><path d="M30 50 Q80 -20 130 50" stroke="#a86a2a" stroke-width="10" fill="none"/>
+    <path d="M12 50 H148 L134 122 H26Z" fill="#d18a3d"/>${[0, 1, 2].map(i => `<path d="M16 ${66 + i * 18} H144" stroke="#b8722a" stroke-width="5"/>`).join('')}
+    <path d="M10 46 H150 V58 H10Z" fill="#e8a256"/><path d="M40 46 q20 -26 44 -4 q16 -18 36 4z" fill="#ff6b6b"/><path d="M52 44 q8 -10 18 0z" fill="#fff" opacity=".5"/></svg>`;
+  P.hab = `<svg viewBox="-60 -70 120 170" overflow="visible"><path d="M0 -66 C40 -66 56 -36 56 -10 C56 22 26 40 14 54 L-14 54 C-26 40 -56 22 -56 -10 C-56 -36 -40 -66 0 -66Z" fill="#ff6b6b"/>
+    <path d="M0 -66 C18 -66 22 -36 22 -10 C22 22 10 40 6 54 L-6 54 C-10 40 -22 22 -22 -10 C-22 -36 -18 -66 0 -66Z" fill="#ffd23a"/>
+    <path d="M-14 54 L-12 74 M14 54 L12 74" stroke="#8a6a4a" stroke-width="2"/><rect x="-14" y="72" width="28" height="22" rx="4" fill="#b8763e"/></svg>`;
+  P.plate = `<svg viewBox="0 0 200 80" overflow="visible"><ellipse cx="100" cy="46" rx="94" ry="30" fill="#d8e2ee"/><ellipse cx="100" cy="40" rx="94" ry="30" fill="#fff"/><ellipse cx="100" cy="40" rx="66" ry="19" fill="#eef3f9"/></svg>`;
+
+  // зелёный холм на всю ширину; верх — фигурный, низ уходит за экран
+  function hill(d, c1, c2) {
+    const id = 'g' + uid++;
+    return `<svg viewBox="0 0 1000 300" preserveAspectRatio="none"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><path d="${d}" fill="url(#${id})"/></svg>`;
   }
-  function fence(y, x0, x1) {
-    let s = `<rect x="${x0}" y="${y + 20}" width="${x1 - x0}" height="12" rx="6" fill="#f3e2c2"/><rect x="${x0}" y="${y + 52}" width="${x1 - x0}" height="12" rx="6" fill="#f3e2c2"/>`;
-    for (let x = x0 + 10; x < x1; x += 46) s += `<path d="M${x} ${y + 90} V${y + 6} l10 -10 l10 10 V${y + 90}Z" fill="#fff4e2"/>`;
-    return s;
-  }
+  const scallop = (y, step = 50, dip = 16) => { let d = `M0 ${y}`; for (let x = 0; x < 1000; x += step) d += ` Q${x + step / 2} ${y - dip} ${x + step} ${y}`; return d + ' L1000 300 L0 300Z'; };
+  const at = (cls, style, inner, tap) => `<div class="prop ${cls}" style="${style}"${tap ? ` data-tap="${tap}"` : ''}>${inner}</div>`;
+  const FLOWER_C = ['#ff7aa8', '#b28cff', '#ffb02e', '#7ac8ff', '#ff6b6b', '#ffffff'];
+
   function scene(kind = 'meadow') {
-    const sky = { meadow: ['#8ed8ff', '#e2f6ff'], farm: ['#8ed8ff', '#e2f6ff'], picnic: ['#a3dcff', '#fff3d6'], balloons: ['#7cc7ff', '#ffe9f2'], sorter: ['#ffe9c7', '#fff8ec'] }[kind];
-    let s = `<svg class="scene-svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMax slice">
-      <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient></defs>
-      <rect width="1600" height="1000" fill="url(#sky)"/>`;
-    if (kind === 'sorter') {
-      // светлая игровая комната: стена, окно, пол
-      s += `<rect x="0" y="0" width="1600" height="700" fill="#fff1d9"/>
-        ${Array.from({ length: 17 }, (_, i) => `<rect x="${i * 100}" y="0" width="50" height="700" fill="#ffe6c2" opacity=".6"/>`).join('')}
-        <rect x="1080" y="90" width="340" height="280" rx="24" fill="#fff"/><rect x="1100" y="110" width="300" height="240" rx="14" fill="#9fdcff"/>
-        ${cloud(1150, 170, .9, 'c')}<path d="M1250 110 V350 M1100 230 H1400" stroke="#fff" stroke-width="14"/>
-        <rect x="0" y="700" width="1600" height="300" fill="#e7b27a"/>
-        ${Array.from({ length: 9 }, (_, i) => `<rect x="0" y="${700 + i * 36}" width="1600" height="4" fill="#c98a4f" opacity=".35"/>`).join('')}
-        <ellipse cx="800" cy="860" rx="620" ry="110" fill="#ff9fb5" opacity=".55"/><ellipse cx="800" cy="860" rx="520" ry="84" fill="#ffc2d1" opacity=".6"/>`;
-      return s + '</svg>';
+    if (kind === 'sorter') return room();
+    let s = `<div class="sc sc-${kind}"><div class="sky"></div><div class="glow"></div>`;
+    s += at('sun', '', P.sun, 'sun');
+    s += [[8, -10, 1], [20, -55, .7], [4, -80, .85], [28, -30, .55]].map(([top, d, sc]) =>
+      at('cloud', `top:${top}%;--cd:${d}s;--cs:${sc}`, P.cloud, 'cloud')).join('');
+    s += `<div class="birds"><svg viewBox="0 0 120 40"><path d="M0 14 Q10 4 20 14 Q30 4 40 14 M50 26 Q58 18 66 26 Q74 18 82 26 M86 8 Q93 1 100 8 Q107 1 114 8" stroke="#5a6a8a" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div>`;
+    if (kind === 'balloons') s += at('hab', '', P.hab, 'hab');
+    s += `<div class="layer far">${hill('M0 150 C150 60 300 80 450 120 C600 160 780 40 1000 90 L1000 300 L0 300Z', '#cdeec0', '#b8e3a4')}</div>`;
+    s += at('pine far-tree', 'left:58%;bottom:36%;width:6vmin', P.pine) + at('pine far-tree', 'left:63%;bottom:35%;width:5vmin', P.pine) + at('pine far-tree', 'left:20%;bottom:38%;width:5.5vmin', P.pine);
+    if (kind === 'farm' || kind === 'meadow') s += at('windmill', 'right:14%;bottom:33%;width:13vmin', P.windmill, 'windmill');
+    s += `<div class="layer mid">${hill('M0 90 C200 30 380 50 560 80 C740 110 860 40 1000 60 L1000 300 L0 300Z', '#a8e486', '#8fd96b')}</div>`;
+    if (kind === 'farm') {
+      s += at('barn', 'left:2%;bottom:20%;width:36vmin', P.barn, 'barn');
+      s += `<div class="fence"></div>`;
+      s += at('hay', 'right:4%;bottom:15%;width:16vmin', P.hay, 'hay');
+      s += at('tree', 'right:26%;bottom:24%;width:22vmin', P.tree(), 'tree');
+    } else if (kind === 'meadow') {
+      s += at('tree', 'left:3%;bottom:20%;width:26vmin', P.tree(), 'tree') + at('tree', 'right:2%;bottom:22%;width:20vmin', P.tree('#5cbf4c', '#ffb02e'), 'tree');
+    } else if (kind === 'picnic') {
+      s += at('tree', 'left:-2%;bottom:24%;width:30vmin', P.tree(), 'tree') + at('tree', 'right:-1%;bottom:26%;width:22vmin', P.tree('#5cbf4c', '#ffb02e'), 'tree');
+    } else if (kind === 'balloons') {
+      s += at('tree', 'left:4%;bottom:14%;width:18vmin', P.tree(), 'tree');
     }
-    s += `<g class="sun" transform="translate(1180 150)"><g class="rays">${Array.from({ length: 12 }, (_, i) => `<path d="M0 -118 L14 -88 L-14 -88Z" fill="#ffd23a" transform="rotate(${i * 30})"/>`).join('')}</g>
-        <circle r="80" fill="#ffd23a"/><circle r="66" fill="#ffe066"/>
-        <g class="look"><g class="eye"><ellipse cx="-24" cy="-10" rx="8" ry="10" fill="${INK}"/></g><g class="eye"><ellipse cx="24" cy="-10" rx="8" ry="10" fill="${INK}"/></g></g>
-        <path d="M-20 18 Q0 34 20 18" stroke="#c9741a" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <ellipse cx="-44" cy="14" rx="12" ry="7" fill="#ff8a5a" opacity=".5"/><ellipse cx="44" cy="14" rx="12" ry="7" fill="#ff8a5a" opacity=".5"/></g>
-      ${cloud(160, 120, 1.3, 'cloud c1')}${cloud(700, 70, .9, 'cloud c2')}${cloud(1050, 230, .7, 'cloud c3')}
-      <path d="M0 600 C220 470 420 500 620 560 C820 620 1000 470 1250 500 C1420 520 1520 560 1600 590 L1600 1000 L0 1000Z" fill="#b4e88a"/>
-      <path d="M0 700 C260 610 520 640 760 690 C980 735 1200 620 1600 670 L1600 1000 L0 1000Z" fill="#8fd96b"/>`;
-    if (kind === 'farm') s += barn(420, 470, 1) + fence(620, 520, 1600) + tree(1250, 540, .9);
-    else if (kind === 'meadow') s += tree(330, 560, 1.1) + tree(1300, 600, .8);
-    else if (kind === 'balloons') s += tree(340, 640, .8);
-    s += `<path d="M0 820 C300 770 600 790 900 820 C1150 845 1400 790 1600 800 L1600 1000 L0 1000Z" fill="#6cc04a"/>`;
+    s += `<div class="layer near">${hill(scallop(60, 40, 14), '#86d465', '#6cc04a')}</div>`;
     if (kind === 'picnic') {
-      s += `<path d="M260 760 L1340 760 L1500 1000 L100 1000Z" fill="#fff"/>`;
+      let q = '';
       for (let i = 0; i < 10; i++) for (let j = 0; j < 4; j++) if ((i + j) % 2 === 0) {
-        const t = j / 4, t2 = (j + 1) / 4, l = x => 260 - 160 * x, r = x => 1340 + 160 * x, w = x => (r(x) - l(x)) / 10;
-        s += `<path d="M${l(t) + i * w(t)} ${760 + t * 240} L${l(t) + (i + 1) * w(t)} ${760 + t * 240} L${l(t2) + (i + 1) * w(t2)} ${760 + t2 * 240} L${l(t2) + i * w(t2)} ${760 + t2 * 240}Z" fill="#ff6b6b" opacity=".85"/>`;
+        const t = j / 4, t2 = (j + 1) / 4, l = x => 120 - 120 * x, w = x => (1000 - 2 * l(x)) / 10;
+        q += `<path d="M${l(t) + i * w(t)} ${t * 300} L${l(t) + (i + 1) * w(t)} ${t * 300} L${l(t2) + (i + 1) * w(t2)} ${t2 * 300} L${l(t2) + i * w(t2)} ${t2 * 300}Z" fill="#ff6b6b"/>`;
       }
+      s += `<div class="blanket"><svg viewBox="0 0 1000 300" preserveAspectRatio="none"><path d="M120 0 L880 0 L1000 300 L0 300Z" fill="#fff8f0"/>${q}<path d="M120 0 L880 0" stroke="#fff" stroke-width="6"/></svg></div>`;
+      s += at('basket', 'right:3%;bottom:24%;width:20vmin', P.basket, 'basket');
     }
-    s += flower(90, 900, '#ff7aa8') + flower(560, 950, '#b28cff') + flower(1180, 930, '#ff7aa8') + flower(1520, 890, '#7ac8ff') + flower(820, 870, '#ffb02e');
-    return s + '</svg>';
+    const fl = kind === 'picnic' ? [[3, 2], [94, 4]] : [[4, 3], [16, 12], [30, 4], [47, 14], [63, 3], [78, 11], [92, 4], [70, 17]];
+    s += fl.map(([x, y], i) => at('flower', `left:${x}%;bottom:${y}%;--fd:${-i * .7}s`, P.flower(FLOWER_C[i % FLOWER_C.length]), 'flower')).join('');
+    s += at('bfly b1', '', P.butterfly('#ff8ad8'), 'bfly') + at('bfly b2', '', P.butterfly('#7ac8ff'), 'bfly');
+    if (kind === 'meadow') s += at('bush fg l', '', P.bush) + at('bush fg r', '', P.bush);
+    return s + '</div>';
+  }
+  function room() {
+    return `<div class="sc sc-room"><div class="wall"></div>
+      <div class="window" data-tap="cloud"><div class="pane">${P.cloud}</div></div>
+      <div class="shelf"><div class="plank"></div><div class="toy t1">${headSvg('bear')}</div><div class="toy t2">${shape('circle', { hex: '#2f8cf0', dark: '#1557a8' }, false)}</div><div class="toy t3">${shape('triangle', { hex: '#ffd23a', dark: '#d99a00' }, false)}</div></div>
+      <div class="frame-pic">${P.sun}</div>
+      <div class="floor"></div><div class="rug"></div>
+      ${at('flower pot', 'left:4%;bottom:26%;--fd:-1s', P.flower('#ff7aa8'), 'flower')}</div>`;
   }
 
   const SHAPE = {
@@ -303,26 +437,38 @@ const ART = (() => {
     star: '<path d="M50 5 L 61.5 36 L 95 37 L 68.5 57.5 L 78 90 L 50 71 L 22 90 L 31.5 57.5 L 5 37 L 38.5 36 Z" stroke-linejoin="round" stroke-width="7"/>',
     heart: '<path d="M50 90 C 18 66 4 48 6 30 C 8 14 22 6 34 8 C 42 9 47 14 50 21 C 53 14 58 9 66 8 C 78 6 92 14 94 30 C 96 48 82 66 50 90 Z"/>',
   };
+  // деревянная фигурка с лицом: тёмная кромка, блик, тень снизу
   function shape(sh, c, face = true) {
     const id = 's' + uid++;
-    return `<svg viewBox="0 0 100 100" overflow="visible"><defs><clipPath id="${id}">${SHAPE[sh]}</clipPath></defs>
-      <g fill="${c.hex}" stroke="${c.hex}" stroke-width="2">${SHAPE[sh]}</g>
-      <g clip-path="url(#${id})"><ellipse cx="50" cy="104" rx="60" ry="30" fill="#000" opacity=".12"/><ellipse cx="34" cy="26" rx="18" ry="9" fill="#fff" opacity=".45" transform="rotate(-25 34 26)"/></g>
-      ${face ? `<g class="look">${eye(40, 54, .55)}${eye(60, 54, .55)}</g><path d="M44 66 Q50 71 56 66" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/>` : ''}</svg>`;
+    return `<svg class="char toy" viewBox="0 0 100 100" overflow="visible"><defs><clipPath id="${id}">${SHAPE[sh]}</clipPath></defs>
+      <g transform="translate(0 4)" fill="${c.dark || c.hex}" stroke="${c.dark || c.hex}" stroke-width="3" stroke-linejoin="round">${SHAPE[sh]}</g>
+      <g fill="${c.hex}" stroke="${c.hex}" stroke-width="3" stroke-linejoin="round">${SHAPE[sh]}</g>
+      <g clip-path="url(#${id})"><ellipse cx="50" cy="106" rx="62" ry="30" fill="#000" opacity=".12"/><ellipse cx="34" cy="24" rx="20" ry="9" fill="#fff" opacity=".5" transform="rotate(-25 34 24)"/></g>
+      ${face ? `<g class="look">${eye(40, 54, .55)}${eye(60, 54, .55)}</g><g class="mouth"><path class="m-closed" d="M44 66 Q50 72 56 66" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/><g class="m-open"><path d="M43 64 Q50 78 57 64Z" fill="#7a2335"/></g></g>
+        <ellipse cx="33" cy="64" rx="5" ry="3" fill="#ff7f9a" opacity=".45"/><ellipse cx="67" cy="64" rx="5" ry="3" fill="#ff7f9a" opacity=".45"/>` : ''}</svg>`;
   }
+  // гнездо в доске: тёмная глубина и внутренняя тень сверху
   function hole(sh, c) {
-    return `<svg viewBox="0 0 100 100" overflow="visible"><g fill="${c ? c.hex : '#5a3418'}" fill-opacity="${c ? .35 : .32}" stroke="#7a4a22" stroke-opacity=".45" stroke-width="3" stroke-dasharray="${c ? '0' : '0'}">${SHAPE[sh]}</g></svg>`;
+    const id = 'o' + uid++;
+    return `<svg viewBox="0 0 100 100" overflow="visible"><defs><clipPath id="${id}">${SHAPE[sh]}</clipPath></defs>
+      <g fill="#6b3d17" stroke="#6b3d17" stroke-width="3" stroke-linejoin="round" opacity=".55">${SHAPE[sh]}</g>
+      <g clip-path="url(#${id})">${c ? `<rect width="100" height="100" fill="${c.hex}" opacity=".85"/>` : ''}
+      <g transform="translate(0 9)" fill="#c98a4f" opacity=".55">${SHAPE[sh]}</g></g>
+      <g fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2.5" transform="translate(0 1.5)">${SHAPE[sh]}</g></svg>`;
   }
   function balloon(c, face = true) {
     const id = 'b' + uid++;
-    return `<svg viewBox="0 0 100 170" overflow="visible"><defs><clipPath id="${id}"><path d="M50 4 C80 4 96 30 96 54 C96 82 72 104 50 108 C28 104 4 82 4 54 C4 30 20 4 50 4Z"/></clipPath></defs>
-      <path d="M50 112 q-9 14 0 28 q9 14 0 28" stroke="#8d7b62" stroke-width="2.4" fill="none"/>
+    return `<svg class="char toy" viewBox="0 0 100 170" overflow="visible"><defs><clipPath id="${id}"><path d="M50 4 C80 4 96 30 96 54 C96 82 72 104 50 108 C28 104 4 82 4 54 C4 30 20 4 50 4Z"/></clipPath></defs>
+      <path class="string" d="M50 112 q-9 14 0 28 q9 14 0 28" stroke="#8d7b62" stroke-width="2.4" fill="none"/>
       <path d="M50 4 C80 4 96 30 96 54 C96 82 72 104 50 108 C28 104 4 82 4 54 C4 30 20 4 50 4Z" fill="${c.hex}"/>
-      <g clip-path="url(#${id})"><ellipse cx="62" cy="112" rx="56" ry="34" fill="#000" opacity=".12"/></g>
-      <path d="M44 106 L56 106 L53 115 L47 115 Z" fill="${c.hex}"/>
-      <ellipse cx="30" cy="32" rx="8" ry="15" fill="#fff" opacity=".5" transform="rotate(28 30 32)"/>
-      ${face ? `<g class="look">${eye(38, 54, .6)}${eye(62, 54, .6)}</g><path d="M42 68 Q50 75 58 68" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/>` : ''}</svg>`;
+      <g clip-path="url(#${id})"><ellipse cx="64" cy="112" rx="58" ry="36" fill="#000" opacity=".14"/></g>
+      <path d="M44 106 L56 106 L53 115 L47 115 Z" fill="${c.dark || c.hex}"/>
+      <ellipse cx="30" cy="32" rx="8" ry="16" fill="#fff" opacity=".55" transform="rotate(28 30 32)"/><circle cx="40" cy="18" r="3.5" fill="#fff" opacity=".6"/>
+      ${face ? `<g class="look">${eye(38, 54, .6)}${eye(62, 54, .6)}</g><g class="mouth"><path class="m-closed" d="M42 68 Q50 75 58 68" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/><g class="m-open"><path d="M41 66 Q50 82 59 66Z" fill="#7a2335"/></g></g>` : ''}</svg>`;
   }
 
-  return { animal: id => A[id](), food: id => F[id](), has: id => !!(A[id] || F[id]), art: id => (A[id] || F[id])(), UI, scene, shape, hole, balloon, eye };
+  return {
+    char, head: headSvg, food: id => F[id](), art: id => (A[id] ? char(id) : F[id]()), isAnimal: id => !!A[id],
+    UI, P, scene, shape, hole, balloon, eye,
+  };
 })();

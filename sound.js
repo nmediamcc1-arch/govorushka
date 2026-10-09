@@ -131,6 +131,11 @@ const SOUND = (() => {
     sparkle() { const t = ctx.currentTime; [84, 88, 91, 96].forEach((m, i) => bell(m, t + i * .06, .12, sfxBus)); },
     win() { const t = ctx.currentTime; [72, 76, 79, 84].forEach((m, i) => marimba(m, t + i * .09, .45, sfxBus)); },
     snap() { const t = ctx.currentTime; osc('square', 1200, t, .03, sfxBus, .15); marimba(79, t + .02, .4, sfxBus); marimba(84, t + .1, .35, sfxBus); },
+    // цветы — колокольчики пентатоники, каждый раз новая нота
+    note() { const t = ctx.currentTime, m = [72, 74, 76, 79, 81, 84, 86][Math.floor(Math.random() * 7)]; marimba(m, t, .5, sfxBus); bell(m + 12, t, .12, sfxBus); },
+    rustle() { const t = ctx.currentTime; [0, .08, .17].forEach(d => noise(t + d, .14, .22, 2500, 'bandpass', sfxBus)); },
+    giggle() { const t = ctx.currentTime; [0, .11, .22, .33].forEach((d, i) => { const o = osc('triangle', 700 + i * 60, t + d, .09, sfxBus, .22); o.frequency.exponentialRampToValueAtTime(1000 + i * 80, t + d + .05); }); },
+    land() { const t = ctx.currentTime; noise(t, .12, .3, 300, 'lowpass', sfxBus); osc('sine', 90, t, .12, sfxBus, .35); },
     fanfare() {
       const t = ctx.currentTime;
       [[72, 0], [76, .15], [79, .3], [84, .45], [79, .75], [84, .9]].forEach(([m, d]) => { marimba(m, t + d, .5, sfxBus); bell(m + 12, t + d, .1, sfxBus); });
