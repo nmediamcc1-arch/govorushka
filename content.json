@@ -1,83 +1,286 @@
 {
-  "items": [
-    {"id": "cow",       "name": "корова",    "sound": "Корова говорит: мууу!",        "group": "animal"},
-    {"id": "cat",       "name": "кошка",     "sound": "Кошка говорит: мяу!",          "group": "animal"},
-    {"id": "dog",       "name": "собачка",   "sound": "Собачка говорит: гав-гав!",    "group": "animal"},
-    {"id": "duck",      "name": "уточка",    "sound": "Уточка говорит: кря-кря!",     "group": "animal"},
-    {"id": "frog",      "name": "лягушка",   "sound": "Лягушка говорит: ква-ква!",    "group": "animal"},
-    {"id": "pig",       "name": "хрюшка",    "sound": "Хрюшка говорит: хрю-хрю!",     "group": "animal"},
-    {"id": "sheep",     "name": "овечка",    "sound": "Овечка говорит: беее!",        "group": "animal"},
-    {"id": "horse",     "name": "лошадка",   "sound": "Лошадка говорит: иго-го!",     "group": "animal"},
-    {"id": "rooster",   "name": "петушок",   "sound": "Петушок говорит: кукареку!",   "group": "animal"},
-    {"id": "mouse",     "name": "мышка",     "sound": "Мышка говорит: пи-пи-пи!",     "group": "animal"},
-    {"id": "bee",       "name": "пчёлка",    "sound": "Пчёлка говорит: жжжжж!",       "group": "animal"},
-    {"id": "owl",       "name": "сова",      "sound": "Сова говорит: ух-ух!",         "group": "animal"},
-    {"id": "rabbit",    "name": "зайка",                                              "group": "animal"},
-    {"id": "bear",      "name": "мишка",                                              "group": "animal"},
-    {"id": "monkey",    "name": "обезьянка",                                          "group": "animal"},
-    {"id": "squirrel",  "name": "белочка",                                            "group": "animal"},
-    {"id": "car",       "name": "машина",    "sound": "Машина едет: би-би!",          "group": "thing"},
-    {"id": "train",     "name": "поезд",     "sound": "Поезд едет: чух-чух!",         "group": "thing"},
-    {"id": "plane",     "name": "самолёт",   "sound": "Самолёт летит: ууууу!",        "group": "thing"},
-    {"id": "ball",      "name": "мяч",                                                "group": "thing"},
-    {"id": "house",     "name": "дом",                                                "group": "thing"},
-    {"id": "teddy",     "name": "мишка",                                              "group": "thing"},
-    {"id": "balloon",   "name": "шарик",                                              "group": "thing"},
-    {"id": "fish",      "name": "рыбка",                                              "group": "thing"},
-    {"id": "sun",       "name": "солнышко",                                           "group": "thing"},
-    {"id": "moon",      "name": "луна",                                               "group": "thing"},
-    {"id": "apple",     "name": "яблоко",                                             "group": "food"},
-    {"id": "banana",    "name": "банан",                                              "group": "food"},
-    {"id": "cheese",    "name": "сыр",                                                "group": "food"},
-    {"id": "carrot",    "name": "морковка",                                           "group": "food"},
-    {"id": "honey",     "name": "мёд",                                                "group": "food"},
-    {"id": "bone",      "name": "косточка",                                           "group": "food"},
-    {"id": "milk",      "name": "молоко",                                             "group": "food"},
-    {"id": "nut",       "name": "орешек",                                             "group": "food"},
-    {"id": "strawberry","name": "клубничка",                                          "group": "food"},
-    {"id": "cookie",    "name": "печенье",                                            "group": "food"}
-  ],
-  "feed": [
-    {"animal": "rabbit",   "food": "carrot", "ask": "Зайка хочет морковку!",     "ok": "Ням-ням! Зайка любит морковку!"},
-    {"animal": "monkey",   "food": "banana", "ask": "Обезьянка хочет банан!",    "ok": "Ням-ням! Обезьянка любит бананы!"},
-    {"animal": "bear",     "food": "honey",  "ask": "Мишка хочет мёд!",          "ok": "Ням-ням! Мишка любит мёд!"},
-    {"animal": "dog",      "food": "bone",   "ask": "Собачка хочет косточку!",   "ok": "Гав! Собачка любит косточки!"},
-    {"animal": "cat",      "food": "milk",   "ask": "Кошка хочет молоко!",       "ok": "Мяу! Кошка любит молоко!"},
-    {"animal": "mouse",    "food": "cheese", "ask": "Мышка хочет сыр!",          "ok": "Пи-пи! Мышка любит сыр!"},
-    {"animal": "squirrel", "food": "nut",    "ask": "Белочка хочет орешек!",     "ok": "Ням-ням! Белочка любит орешки!"}
-  ],
-  "colors": [
-    {"id": "red",    "hex": "#f0443a", "dark": "#b81f1a", "m": "красный", "f": "красная", "n": "красное"},
-    {"id": "blue",   "hex": "#2f8cf0", "dark": "#1557a8", "m": "синий",   "f": "синяя",   "n": "синее"},
-    {"id": "yellow", "hex": "#ffd23a", "dark": "#d99a00", "m": "жёлтый",  "f": "жёлтая",  "n": "жёлтое"},
-    {"id": "green",  "hex": "#4cc35a", "dark": "#23803a", "m": "зелёный", "f": "зелёная", "n": "зелёное"}
-  ],
-  "shapes": [
-    {"id": "circle",   "name": "круг",        "g": "m"},
-    {"id": "square",   "name": "квадрат",     "g": "m"},
-    {"id": "triangle", "name": "треугольник", "g": "m"},
-    {"id": "star",     "name": "звёздочка",   "g": "f"},
-    {"id": "heart",    "name": "сердечко",    "g": "n"}
-  ],
-  "phrases": {
-    "hello": "Привет! Давай играть!",
-    "menu_farm": "Ферма! Кто как говорит?",
-    "menu_find": "Где кто?",
-    "menu_feed": "Накорми зверей!",
-    "menu_sorter": "Фигурки!",
-    "menu_balloons": "Шарики!",
-    "menu_say": "Скажи сам!",
-    "praise_1": "Молодец!",
-    "praise_2": "Умница!",
-    "praise_3": "Правильно!",
-    "praise_4": "Ура!",
-    "praise_5": "Здорово!",
-    "praise_6": "Отлично!",
-    "oops": "Ой, не сюда! Попробуй ещё.",
-    "sorter_intro": "Положи фигурки в домики!",
-    "sorter_done": "Ура! Все фигурки дома!",
-    "finish": "Ура! Ты большой молодец! Давай отдохнём.",
-    "your_voice": "Послушай себя!",
-    "great_talk": "Как здорово ты говоришь!"
+ "items": [
+  {
+   "id": "cow",
+   "name": "корова",
+   "sound": "Корова говорит: мууу!",
+   "group": "animal",
+   "says": "мууу"
+  },
+  {
+   "id": "cat",
+   "name": "кошка",
+   "sound": "Кошка говорит: мяу!",
+   "group": "animal",
+   "says": "мяу"
+  },
+  {
+   "id": "dog",
+   "name": "собачка",
+   "sound": "Собачка говорит: гав-гав!",
+   "group": "animal",
+   "says": "гав-гав"
+  },
+  {
+   "id": "duck",
+   "name": "уточка",
+   "sound": "Уточка говорит: кря-кря!",
+   "group": "animal",
+   "says": "кря-кря"
+  },
+  {
+   "id": "frog",
+   "name": "лягушка",
+   "sound": "Лягушка говорит: ква-ква!",
+   "group": "animal",
+   "says": "ква-ква"
+  },
+  {
+   "id": "pig",
+   "name": "хрюшка",
+   "sound": "Хрюшка говорит: хрю-хрю!",
+   "group": "animal",
+   "says": "хрю-хрю"
+  },
+  {
+   "id": "sheep",
+   "name": "овечка",
+   "sound": "Овечка говорит: беее!",
+   "group": "animal",
+   "says": "беее"
+  },
+  {
+   "id": "horse",
+   "name": "лошадка",
+   "sound": "Лошадка говорит: иго-го!",
+   "group": "animal",
+   "says": "иго-го"
+  },
+  {
+   "id": "rooster",
+   "name": "петушок",
+   "sound": "Петушок говорит: кукареку!",
+   "group": "animal",
+   "says": "кукареку"
+  },
+  {
+   "id": "mouse",
+   "name": "мышка",
+   "sound": "Мышка говорит: пи-пи-пи!",
+   "group": "animal",
+   "says": "пи-пи-пи"
+  },
+  {
+   "id": "bee",
+   "name": "пчёлка",
+   "sound": "Пчёлка говорит: жжжжж!",
+   "group": "animal",
+   "says": "жжжжж"
+  },
+  {
+   "id": "owl",
+   "name": "сова",
+   "sound": "Сова говорит: ух-ух!",
+   "group": "animal",
+   "says": "ух-ух"
+  },
+  {
+   "id": "rabbit",
+   "name": "зайка",
+   "group": "animal"
+  },
+  {
+   "id": "bear",
+   "name": "мишка",
+   "group": "animal"
+  },
+  {
+   "id": "monkey",
+   "name": "обезьянка",
+   "group": "animal"
+  },
+  {
+   "id": "squirrel",
+   "name": "белочка",
+   "group": "animal"
+  },
+  {
+   "id": "apple",
+   "name": "яблоко",
+   "group": "food"
+  },
+  {
+   "id": "banana",
+   "name": "банан",
+   "group": "food"
+  },
+  {
+   "id": "cheese",
+   "name": "сыр",
+   "group": "food"
+  },
+  {
+   "id": "carrot",
+   "name": "морковка",
+   "group": "food"
+  },
+  {
+   "id": "honey",
+   "name": "мёд",
+   "group": "food"
+  },
+  {
+   "id": "bone",
+   "name": "косточка",
+   "group": "food"
+  },
+  {
+   "id": "milk",
+   "name": "молоко",
+   "group": "food"
+  },
+  {
+   "id": "nut",
+   "name": "орешек",
+   "group": "food"
+  },
+  {
+   "id": "strawberry",
+   "name": "клубничка",
+   "group": "food"
+  },
+  {
+   "id": "cookie",
+   "name": "печенье",
+   "group": "food"
   }
+ ],
+ "feed": [
+  {
+   "animal": "rabbit",
+   "food": "carrot",
+   "ask": "Зайка хочет морковку!",
+   "ok": "Ням-ням! Зайка любит морковку!"
+  },
+  {
+   "animal": "monkey",
+   "food": "banana",
+   "ask": "Обезьянка хочет банан!",
+   "ok": "Ням-ням! Обезьянка любит бананы!"
+  },
+  {
+   "animal": "bear",
+   "food": "honey",
+   "ask": "Мишка хочет мёд!",
+   "ok": "Ням-ням! Мишка любит мёд!"
+  },
+  {
+   "animal": "dog",
+   "food": "bone",
+   "ask": "Собачка хочет косточку!",
+   "ok": "Гав! Собачка любит косточки!"
+  },
+  {
+   "animal": "cat",
+   "food": "milk",
+   "ask": "Кошка хочет молоко!",
+   "ok": "Мяу! Кошка любит молоко!"
+  },
+  {
+   "animal": "mouse",
+   "food": "cheese",
+   "ask": "Мышка хочет сыр!",
+   "ok": "Пи-пи! Мышка любит сыр!"
+  },
+  {
+   "animal": "squirrel",
+   "food": "nut",
+   "ask": "Белочка хочет орешек!",
+   "ok": "Ням-ням! Белочка любит орешки!"
+  }
+ ],
+ "colors": [
+  {
+   "id": "red",
+   "hex": "#f0443a",
+   "dark": "#b81f1a",
+   "m": "красный",
+   "f": "красная",
+   "n": "красное"
+  },
+  {
+   "id": "blue",
+   "hex": "#2f8cf0",
+   "dark": "#1557a8",
+   "m": "синий",
+   "f": "синяя",
+   "n": "синее"
+  },
+  {
+   "id": "yellow",
+   "hex": "#ffd23a",
+   "dark": "#d99a00",
+   "m": "жёлтый",
+   "f": "жёлтая",
+   "n": "жёлтое"
+  },
+  {
+   "id": "green",
+   "hex": "#4cc35a",
+   "dark": "#23803a",
+   "m": "зелёный",
+   "f": "зелёная",
+   "n": "зелёное"
+  }
+ ],
+ "shapes": [
+  {
+   "id": "circle",
+   "name": "круг",
+   "g": "m"
+  },
+  {
+   "id": "square",
+   "name": "квадрат",
+   "g": "m"
+  },
+  {
+   "id": "triangle",
+   "name": "треугольник",
+   "g": "m"
+  },
+  {
+   "id": "star",
+   "name": "звёздочка",
+   "g": "f"
+  },
+  {
+   "id": "heart",
+   "name": "сердечко",
+   "g": "n"
+  }
+ ],
+ "phrases": {
+  "hello": "Привет! Давай играть!",
+  "menu_farm": "Ферма! Кто как говорит?",
+  "menu_find": "Где кто?",
+  "menu_feed": "Накорми зверей!",
+  "menu_sorter": "Фигурки!",
+  "menu_balloons": "Шарики!",
+  "praise_1": "Молодец!",
+  "praise_2": "Умница!",
+  "praise_3": "Правильно!",
+  "praise_4": "Ура!",
+  "praise_5": "Здорово!",
+  "praise_6": "Отлично!",
+  "oops": "Ой, не сюда! Попробуй ещё.",
+  "sorter_intro": "Положи фигурки в домики!",
+  "sorter_done": "Ура! Все фигурки дома!",
+  "finish": "Ура! Ты большой молодец! Давай отдохнём.",
+  "go": "Поехали!",
+  "who_intro": "Послушай, кто это?",
+  "feed_intro": "Зверята проголодались!",
+  "pop_intro": "Лопай шарики!",
+  "oops_animal": "Ой, это не мне!"
+ }
 }

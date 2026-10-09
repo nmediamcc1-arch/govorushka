@@ -19,9 +19,10 @@ def phrases(c):
         p[f"name_{i}"] = f"{n.capitalize()}!"
         p[f"where_{i}"] = f"Где {n}?"
         p[f"this_{i}"] = f"Это {n}."
-        p[f"say_{i}"] = f"Это {n}. Скажи: {n}!"
         if "sound" in it:
             p[f"sound_{i}"] = it["sound"]
+        if "says" in it:
+            p[f"who_{i}"] = f"Кто говорит: {it['says']}?"
     for f in c["feed"]:
         p[f"feed_ask_{f['animal']}"] = f["ask"]
         p[f"feed_ok_{f['animal']}"] = f["ok"]
@@ -29,6 +30,7 @@ def phrases(c):
         p[f"ball_{col['id']}"] = f"{col['m'].capitalize()} шарик!"
         p[f"whereball_{col['id']}"] = f"Где {col['m']} шарик?"
         p[f"thisball_{col['id']}"] = f"Это {col['m']} шарик."
+        p[f"pop_{col['id']}"] = f"Лопни {col['m']} шарик!"
     for s in c["shapes"]:
         for col in c["colors"]:
             p[f"combo_{col['id']}_{s['id']}"] = f"{col[s['g']]} {s['name']}".capitalize() + "!"
